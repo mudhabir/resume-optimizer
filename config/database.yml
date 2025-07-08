@@ -51,5 +51,5 @@ test:
 production:
   <<: *default
   database: resume_optimizer_production
-  username: resume_optimizer
+  username: root
   password: <%= ENV['RESUME_OPTIMIZER_DATABASE_PASSWORD'] %>
