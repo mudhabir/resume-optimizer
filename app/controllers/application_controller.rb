@@ -16,8 +16,8 @@ class ApplicationController < ActionController::Base
       begin
         payload = JWT.decode(token, ENV['JWT_SECRET_KEY'])[0]
         Rails.logger.info "payload user id :: #{payload}"
-        @current_user = User.find(payload['user_id'])
-        Rails.logger.info "@current_user :: #{@current_user.inspect}"
+        current_user = User.find(payload['user_id'])
+        Rails.logger.info "current_user :: #{current_user.inspect}"
   
       rescue JWT::ExpiredSignature
         render json: { error: 'Token has expired' }, status: :unauthorized
