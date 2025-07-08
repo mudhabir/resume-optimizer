@@ -1,11 +1,11 @@
 default: &default
-  adapter: mysql2
-  encoding: utf8mb4
+  adapter: postgresql
+  encoding: unicode
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  username: root
-  password:
+  username: postgres
+  password: password
   host: localhost
 
 development:
   <<: *default
-  database: myapp_development
+  database: resume_optimizer_dev

@@ -11,4 +11,6 @@ class OptimizerSession < ApplicationRecord
         ANALYSIS_COMPLETE: 2,
         OPTIMIZED: 3
     }
+
+    STATUS_ID_TO_NAME = STATUS.invert
 end
