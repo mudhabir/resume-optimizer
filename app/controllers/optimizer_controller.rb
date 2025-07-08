@@ -7,12 +7,14 @@ class OptimizerController < ApplicationController
     include MagicContentHelper
 
     def index
-        optimized_resumes = current_user.resume_optimizers
-        render json: optimized_resumes, status: :ok
+        response = current_user.optimizer_sessions.each_with_object([]) do |session, obj|
+            obj << { id: session.id, input_file_name: session.file_name, status: OptimizerSession::STATUS_ID_TO_NAME[session.status]}
+        end
+        render json: response, status: :ok
     end
 
     def show
-        optimizer_session = current_user.resume_optimizers.find(params[:id])
+        optimizer_session = current_user.optimizer_sessions.find(params[:id])
         render json: optimizer_session, status: :ok
     end
 
@@ -113,5 +115,60 @@ class OptimizerController < ApplicationController
             },
             credit_points_remaining: current_user.credit_points
         }, status: :ok
+    end
+
+    def optimized_resume
+        optimizer_session = OptimizerSession.find_by(id: params['session_id'].to_i )
+        if optimizer_session.nil?
+            render json: { error: "Session not found. Please create a session first." }, status: :not_found
+            return
+        end
+
+        if optimizer_session.file_name.blank? || optimizer_session.job_description_content.blank?
+            render json: { error: "Resume file and description are required to start analysis." }, status: :bad_request
+            return
+        end
+
+        if optimizer_session.analysis_result.blank?
+            render json: { error: "Analysis must be completed before generating optimized resume." }, status: :bad_request
+            return
+        end
+
+        begin
+            # Get the original resume text
+            resume_text = get_resume_text(optimizer_session.file_name)
+            
+            # Generate optimized content using AI
+            optimized_content = optimize_resume_content(resume_text, optimizer_session.job_description_content, optimizer_session.analysis_result)
+            
+            # Generate new filename for optimized resume
+            original_filename = get_original_file_name(optimizer_session.file_name)
+            original_extension = File.extname(original_filename).downcase
+            
+            # Generate PDF filename regardless of original format
+            base_name = File.basename(original_filename, '.*')
+            optimized_filename = file_name_unique("optimized_#{base_name}.pdf")
+            
+            # Generate properly formatted PDF
+            generate_optimized_pdf(optimized_content, optimizer_session.file_name, optimized_filename)
+            
+            # Update optimizer session with optimized file info
+            optimizer_session.optimized_file_name = optimized_filename
+            optimizer_session.status = OptimizerSession::STATUS[:OPTIMIZED]
+            optimizer_session.save!
+            
+            render json: { 
+                message: "Optimized resume generated successfully",
+                optimized_file_url: "/uploads/#{optimized_filename}",
+                session_id: optimizer_session.id,
+                status: "optimized",
+                original_format: original_extension,
+                optimized_format: ".pdf"
+            }, status: :ok
+            
+        rescue => e
+            Rails.logger.error "Error generating optimized resume: #{e.message}"
+            render json: { error: "Failed to generate optimized resume: #{e.message}" }, status: :internal_server_error
+        end
     end
 end
