@@ -32,7 +32,7 @@ class OptimizerController < ApplicationController
                 file.write(uploaded_file.read)
             end
 
-            optimized_resume = OptimizerSession.new(user_id: @current_user.id, file_name: filename, status: OptimizerSession::STATUS[:RESUME_UPLOADED])
+            optimized_resume = OptimizerSession.new(user_id: current_user.id, file_name: filename, status: OptimizerSession::STATUS[:RESUME_UPLOADED])
             optimized_resume.save!
         
             render json: { message: "File uploaded successfully", file_url: "/uploads/#{filename}" }, status: :ok

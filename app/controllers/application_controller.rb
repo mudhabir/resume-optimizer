@@ -6,6 +6,10 @@ class ApplicationController < ActionController::Base
 
     private
 
+    def current_user
+      @current_user
+    end
+
     def authenticate_user!
       token = request.headers['Authorization']&.split(' ')&.last
   
