@@ -1,8 +1,7 @@
 require 'open-uri'
 require 'nokogiri'
 
-class OptimizerController < ApplicationController
-    protect_from_forgery with: :null_session
+class OptimizerController < ApiController
     include OptimizerHelper
     include MagicContentHelper
 
