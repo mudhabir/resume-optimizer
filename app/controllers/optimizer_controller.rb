@@ -20,7 +20,8 @@ class OptimizerController < ApplicationController
 
     def upload
         uploaded_file = params[:file]
-
+        Rails.logger.info "current_user :: #{current_user.inspect}"
+        Rails.logger.info "@current_user :: #{@current_user.inspect}"
         if uploaded_file.present? && uploaded_file.content_type.in?(['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
             filename = file_name_unique(uploaded_file.original_filename)
             save_dir = Rails.root.join('public', 'uploads')
