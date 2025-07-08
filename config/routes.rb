@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  get 'home/index'
+  # get 'home/index'
   post 'api/session/create', to: 'optimizer#session_create'
   post 'api/resume/upload', to: 'optimizer#upload'
   post 'api/job_description', to: 'optimizer#job_description'
@@ -14,5 +14,5 @@ Rails.application.routes.draw do
 
   devise_for :users, controllers: { omniauth_callbacks: 'users/omniauth_callbacks' }, skip: [:sessions, :registrations, :passwords]
 
-  root "home#index"
+  # root "home#index"
 end
