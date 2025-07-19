@@ -18,7 +18,6 @@ class OptimizerController < ApplicationController
     end
 
     def process_resume_and_jd
-        byebug
         jd_data = JSON.parse(params['jd_data'])
         input_type = jd_data['type']
         content = jd_data['content']
