@@ -19,8 +19,8 @@ default: &default
 
 development:
   <<: *default
-  username: root
-  password:
+  username: postgres
+  password: password
   database: resume_optimizer_development
 
 # Warning: The database defined as "test" will be erased and

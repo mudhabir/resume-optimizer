@@ -1,8 +1,7 @@
 Rails.application.routes.draw do
   # get 'home/index'
   post 'api/session/create', to: 'optimizer#session_create'
-  post 'api/resume/upload', to: 'optimizer#upload'
-  post 'api/job_description', to: 'optimizer#job_description'
+  post 'api/process_resume_and_jd', to: 'optimizer#process_resume_and_jd'
   post 'api/analyze/start', to: 'optimizer#start_analysis'
   post 'api/resume/optimize', to: 'optimizer#optimized_resume'
 

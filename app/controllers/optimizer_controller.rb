@@ -17,7 +17,18 @@ class OptimizerController < ApplicationController
         render json: optimizer_session, status: :ok
     end
 
-    def upload
+    def process_resume_and_jd
+        byebug
+        jd_data = JSON.parse(params['jd_data'])
+        input_type = jd_data['type']
+        content = jd_data['content']
+        job_title = jd_data['job_title']
+
+        if input_type.blank? || content.blank?
+          render json: { error: "Both 'type' and 'content' parameters are required." }, status: :bad_request
+          return
+        end
+
         uploaded_file = params[:file]
         if uploaded_file.present? && uploaded_file.content_type.in?(['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
             filename = file_name_unique(uploaded_file.original_filename)
@@ -29,26 +40,12 @@ class OptimizerController < ApplicationController
                 file.write(uploaded_file.read)
             end
 
-            optimized_resume = OptimizerSession.new(user_id: current_user.id, file_name: filename, status: OptimizerSession::STATUS[:RESUME_UPLOADED])
-            optimized_resume.save!
-        
-            render json: { message: "File uploaded successfully", file_url: "/uploads/#{filename}" }, status: :ok
+            optimizer_session = OptimizerSession.new(user_id: current_user.id, file_name: filename, status: OptimizerSession::STATUS[:RESUME_UPLOADED])
         else
             render json: { error: "Please upload a valid PDF file" }, status: :bad_request
-        end
-    end
-
-    def job_description
-        input_type = params[:type]
-        content = params[:content]
-        job_title = params[:job_title]
-
-        if input_type.blank? || content.blank?
-          render json: { error: "Both 'type' and 'content' parameters are required." }, status: :bad_request
-          return
+            return
         end
 
-        optimizer_session = OptimizerSession.find_by(id: params['session_id'].to_i )
         if input_type == "text"
             optimizer_session.job_description_content = content
             optimizer_session.status = OptimizerSession::STATUS[:JOB_DESCRIPTION_PROVIDED]
@@ -70,7 +67,8 @@ class OptimizerController < ApplicationController
         end
 
         render json: {
-            "sessionId": params['session_id'],
+            "sessionId": optimizer_session.id,
+            "file_url": "/uploads/#{filename}",
             "status": "jd_provided",
             "jd_content": optimizer_session.job_description_content,
             "message": "Job description saved successfully."
